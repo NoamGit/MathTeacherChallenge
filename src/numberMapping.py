@@ -125,15 +125,16 @@ def number_parsing(equation_list, text):
     text, _ = number_mapper(text, tmp_eq_num_list)
     return equation_list, eq_num_list, text
 
-train_data = pd.read_json(r'C:\Users\Five\Documents\DataHack\Data\dolphin-number_word_std\number_word_std.dev.json')
-text_list = train_data['text']
+if __name__ == '__main__':
+    train_data = pd.read_json(r'C:\Users\Five\Documents\DataHack\Data\dolphin-number_word_std\number_word_std.dev.json')
+    text_list = train_data['text']
 
-for i in range(5):
-    equation_list = train_data.iloc[i].equations
-    text = train_data.iloc[i].text
+    for i in range(5):
+        equation_list = train_data.iloc[i].equations
+        text = train_data.iloc[i].text
 
-    print(text)
-    print(equation_list)
+        print(text)
+        print(equation_list)
 
-    equation_list, eq_num_list, text = number_parsing(equation_list, text)
-    print(text, '\n', equation_list, '\n', eq_num_list, '\n')
+        equation_list, eq_num_list, text = number_parsing(equation_list, text)
+        print(text, '\n', equation_list, '\n', eq_num_list, '\n')
