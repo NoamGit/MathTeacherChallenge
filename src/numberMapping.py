@@ -123,10 +123,11 @@ def number_parsing(equation_list, text):
             text: the word math question with numbers as $n0, $n1,...
     '''
     text = re.sub('[.,]', '', text)
-    equation_list, eq_num_list = list_number_mapper(equation_list)
+    equation_list_template, eq_num_list = list_number_mapper(equation_list)
     tmp_eq_num_list = eq_num_list.copy()
     text, text_num_list, var_list = number_mapper(text.replace("-", " "), tmp_eq_num_list)
-    return equation_list, eq_num_list, text, var_list, text_num_list
+    new_equation_list = generate_new_equation(equation_list_template, eq_num_list, var_list, text_num_list)
+    return new_equation_list, eq_num_list, text, var_list, text_num_list
 
 
 def test_number_parsing(text):
@@ -160,13 +161,11 @@ if __name__ == '__main__':
     equation_list = data.iloc[ii].equations
     text = data.iloc[ii].text
     equation_list_template, eq_num_list, text_template, var_list, text_num_list = number_parsing(equation_list, text)
-    new_equations = generate_new_equation(equation_list_template, eq_num_list, var_list, text_num_list)
 
     print(
         f"\noriginal text:\t\t{text}\ntemplate text:\t\t{text_template}\ntext num list:\t\t{text_num_list}\nequation list:\t\t{equation_list}")
     print(
         f"eq list template:\t{equation_list_template}\nnumlist from eq:\t\t{eq_num_list}\nfinal numlist from text:\t{var_list}")
-    print(f"created equation: \t {new_equations}")
     # test the test set
 
     # for i in range(1):
