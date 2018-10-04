@@ -10,8 +10,11 @@ math_test = pd.read_json(r"..\Data\dolphin-number_word_std\number_word_std.test.
 model = SIM()
 model.fit(math_train)
 
-print(f'equation score on train: {model.equation_score(math_train)}')
-print(f'equation score on test: {model.equation_score(math_test)}')
+score_train, report_df = model.equation_score(math_train, output_errors=True)
+print(f'equation score on train: {score_train}')
+report_df.to_csv(r"..\results\error_analysis\equation_score_train.csv")
 
-print(f'result score on train: {model.result_score(math_train)}')
-print(f'result score on test: {model.result_score(math_test)}')
+# print(f'equation score on test: {model.equation_score(math_test)}')
+#
+# print(f'result score on train: {model.result_score(math_train)}')
+# print(f'result score on test: {model.result_score(math_test)}')
