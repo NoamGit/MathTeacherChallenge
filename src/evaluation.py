@@ -12,4 +12,7 @@ print(f'equation score on train: {model.equation_score(math_train)}')
 print(f'equation score on test: {model.equation_score(math_test)}')
 
 print(f'result score on train: {model.result_score(math_train,frac=0.1,verbose=False)}')
-print(f'result score on test: {model.result_score(math_test, frac=1, verbose=True)}')
+
+acc, df = model.result_score(math_test, frac=0.1, verbose=True,output_errors=True)
+print(f'result score on test: {acc}')
+df.to_csv(r'..\results\test_error_analysis.csv',index=False)

@@ -102,7 +102,7 @@ class SIM(NearestNeighbors):
 
         return corpus_df
 
-    def result_score(self, corpus_df, frac=1, verbose=False):
+    def result_score(self, corpus_df, frac=1, verbose=False, output_errors=False):
 
         def solve(problem):
             try:
@@ -114,12 +114,17 @@ class SIM(NearestNeighbors):
 
         corpus_df = self.predict(corpus_df)
 
+        error_list = []
         correct, total = 0, 0
-        for _,problem in corpus_df.sample(frac=frac).iterrows():
+        for k,problem in corpus_df.sample(frac=frac).iterrows():
             pred_ans = solve(problem)
             real_ans = problem['ans_simple']
             if utils.is_same_result(real_ans, pred_ans):
                 correct += 1
+            else:
+                error_list += [(k, ';'.join(problem['equations']).replace('equ:', ''),
+                                ';'.join(problem['predicted_equations']).replace('equ:', ''), problem['text'])]
+
             total += 1
             if verbose: print(correct,total,correct/total)
 
@@ -130,19 +135,22 @@ class SIM(NearestNeighbors):
         #         correct += 1
         #     total += 1
 
-        return correct/total
+        if output_errors:
+            return correct / total, pd.DataFrame(error_list, columns=['ind', 'equations', 'predicted_equations','text'])
+        else:
+            return correct / total
 
     def equation_score(self, corpus_df, output_errors=False):
         corpus_df = self.predict(corpus_df)
 
         not_correct, total = 0, 0
         error_list = []
-        for k, row in corpus_df.iterrows():
+        for k, problem in corpus_df.iterrows():
             total += 1
-            for real, pred in zip(row['equations'], row['predicted_equations']):
+            for real, pred in zip(problem['equations'], problem['predicted_equations']):
                 if pred.replace(' ', '') != real.replace(' ', ''):
                     if output_errors:
-                        error_list += [(k, ';'.join(row['equations']).replace('equ: ', ''), ';'.join(row['predicted_equations']).replace('equ: ', ''), row['correct'],row['text'])]
+                        error_list += [(k, ';'.join(problem['equations']).replace('equ: ', ''), ';'.join(problem['predicted_equations']).replace('equ: ', ''), problem['correct'],problem['text'])]
                     not_correct += 1
                     break
         if output_errors:
