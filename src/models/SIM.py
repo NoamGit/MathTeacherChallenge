@@ -6,7 +6,6 @@ from numberMapping import number_parsing, test_number_parsing
 
 import utils
 
-
 class SIM(NearestNeighbors):
     def __init__(self, **kwargs):
         super(SIM, self).__init__(**kwargs)
@@ -55,7 +54,7 @@ class SIM(NearestNeighbors):
         '''
         # extract numbers
         corpus_df[['text_symbol', 'numbers']] = corpus_df.apply(lambda row: pd.Series(test_number_parsing(row['text'])),
-                                                                axis=1)
+                                                         axis=1)
 
         # tfidf
         X = self.tfidf_model.transform(corpus_df['text_symbol'].values)
@@ -66,28 +65,24 @@ class SIM(NearestNeighbors):
 
         # only neighbors with the same numbers
         final_neighbor_pred = []
-        correct = []
-        for i, (k, problem) in enumerate(corpus_df.iterrows()):
-            # TODO: add filter: same number of unknown variables
+        # correct = []
+        for i,(_, problem) in enumerate(corpus_df.iterrows()):
             relevant_neighbors = problem['neighbors_prediction'][
                 self.num_variables[problem['neighbors_prediction']] == len(problem['numbers'])]
-            if i != relevant_neighbors[0]:
-                print(f"self-rank in neighbors: {np.argwhere(relevant_neighbors==i)[0][0]}")
-                correct.append(False)
-            else:
-                correct.append(True)
-
+            # if i != relevant_neighbors[0]:
+            #     correct.append(False)
+            # else:
+            #     correct.append(True)
             if len(relevant_neighbors) > 0:
-                # if False:
                 final_neighbor_pred.append(relevant_neighbors[0])
             else:
                 final_neighbor_pred.append(problem['neighbors_prediction'][0])
         corpus_df['final_neighbor_prediction'] = final_neighbor_pred
-        corpus_df['correct'] = correct
+        # corpus_df['correct'] = correct
 
         # transform to equations
         predicted_equations = []
-        for k, problem in corpus_df.iterrows():
+        for _, problem in corpus_df.iterrows():
             equations = self.train_df['equations_symbol'].iloc[problem['final_neighbor_prediction']]
             var_list = self.train_df['var_list'].iloc[problem['final_neighbor_prediction']]
             if len(var_list) != len(problem['numbers']):
@@ -114,20 +109,20 @@ class SIM(NearestNeighbors):
                 a = utils.solve_eq_string(problem["predicted_equations"], integer_flag=utils.is_number(problem["text"]))
                 return a
             except Exception as e:
-                # print(e)
+                #print(e)
                 return []
 
         corpus_df = self.predict(corpus_df)
         reals_ans = corpus_df['ans_simple']
-        preds_ans = corpus_df.apply(solve, axis=1)
+        preds_ans = corpus_df.apply(solve,axis=1)
 
         correct, total = 0, 0
-        for real_ans, pred_ans in zip(reals_ans, preds_ans):
-            if utils.is_same_result(real_ans, pred_ans):
+        for real_ans,pred_ans in zip(reals_ans,preds_ans):
+            if utils.is_same_result(real_ans,pred_ans):
                 correct += 1
             total += 1
 
-        return correct / total
+        return correct/total
 
     def equation_score(self, corpus_df, output_errors=False):
         corpus_df = self.predict(corpus_df)
