@@ -114,6 +114,11 @@ def solve_eq_string(math_eq_format: List[str], integer_flag=False):
     # print(solve([-x + y - 4, 2*x - 5*y + 11], sym_var))
     # print(solve([-x + y - 4, 2*x - 5*y + 11], (x,y)))
 
+def sparse_binary_jaccard(v1, v2):
+    v1_nz = set(v1.nonzero()[1])
+    v2_nz = set(v2.nonzero()[1])
+    return len(v1_nz.intersection(v2_nz))/len(v1_nz.union(v2_nz))
+
 def is_number(query_text:str):
     query_text = query_text.lower()
     if any([t in query_text for t in IS_NUM_DICT]):
