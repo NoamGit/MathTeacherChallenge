@@ -22,6 +22,7 @@ class TestUtils(TestCase):
         problem = test.iloc[ii]
         res = solve_eq_string(problem["equations"],integer_flag=is_number(problem["text"]))
         # more than 1 possible solution
+
         is_in = False
         if isinstance(res,list) and isinstance(res[0],list):
             for ans in res:

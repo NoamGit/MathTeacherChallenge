@@ -9,6 +9,7 @@ from sympy.sets.sets import EmptySet
 from sympy.solvers.solveset import linsolve
 from sympy.solvers import solve
 import numpy as np
+from pprint import pprint
 
 IS_NUM_DICT = ['integer','consecutive']
 TRANSFORMATION = standard_transformations + (convert_xor,)
@@ -61,7 +62,6 @@ def solve_eq_string(math_eq_format: List[str], integer_flag=False):
         # var = Symbol(v, integer=integer_flag) if integer_flag else Symbol(v)
         sym_var+=(var,)
 
-    eq_list = []
     parse_eq_list = []
     kw_parser = dict(evaluate=True,transformations=TRANSFORMATION)
     for eq in math_eq_format[1:]:
