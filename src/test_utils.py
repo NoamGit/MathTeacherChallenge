@@ -1,7 +1,7 @@
 from unittest import TestCase
 import pandas as pd
-from utils import solve_eq_string, is_number
-
+from utils import solve_eq_string, is_number, are_close
+import numpy as np
 
 class TestUtils(TestCase):
 
@@ -17,9 +17,16 @@ class TestUtils(TestCase):
         # train["equations"].apply(lambda x:set(solve_eq_string(x)))
         # train["ans"].apply(.iloc[6]
 
-        # bad ii = 4
-        ii = 344
+        # bad ii = 4, 74
+        ii = 4
         problem = test.iloc[ii]
         res = solve_eq_string(problem["equations"],integer_flag=is_number(problem["text"]))
-        # if isinstance(res,List[list])
-        self.assertAlmostEqual(list(set(res)), list(set(problem["ans_simple"])))
+        # more than 1 possible solution
+        is_in = False
+        if isinstance(res,list) and isinstance(res[0],list):
+            for ans in res:
+                if are_close(ans,problem["ans_simple"]):
+                    is_in = True
+            self.assertTrue(is_in)
+        else:
+            self.assertTrue(are_close(res,problem["ans_simple"]))

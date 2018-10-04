@@ -1,13 +1,18 @@
 from typing import List
 
+import wolframalpha
 from sympy.parsing.sympy_parser import parse_expr
+from sympy.parsing.sympy_parser import standard_transformations, convert_xor
 from sympy import symbols,var,Symbol
 from sympy import solveset, S
 from sympy.sets.sets import EmptySet
 from sympy.solvers.solveset import linsolve
 from sympy.solvers import solve
+import numpy as np
 
-IS_NUM_DICT = ['integer','consecutive',]
+IS_NUM_DICT = ['integer','consecutive']
+TRANSFORMATION = standard_transformations + (convert_xor,)
+WOLF_CLIENT = wolframalpha.Client(app_id="23XUAT-H2875HHEEX")
 # region Utilities
 
 def switch_sign(txt:str):
@@ -19,6 +24,26 @@ def switch_sign(txt:str):
     if plus_pos != -1:
         txt_list[plus_pos] = '-'
     return ''.join(txt_list)
+
+def are_close(l1,l2):
+    return np.allclose(np.sort(l1).astype(float), np.sort(l2))
+
+def solve_with_wolfram(input_str:str):
+    sol_wolfram = WOLF_CLIENT.query(input_str.split('equ: ')[-1].replace(' ', ''))
+    # TODO: parse wolfram solution
+    if 'Solutions' in sol_wolfram.details:
+        sol_wolf = sol_wolfram.details['Solutions']
+    elif 'Solution' in sol_wolfram.details:
+        sol_wolf = sol_wolfram.details['Solution']
+    elif 'Roots' in sol_wolfram.details:
+        sol_wolf = sol_wolfram.details['Roots']
+    elif 'Root' in sol_wolfram.details:
+        sol_wolf = sol_wolfram.details['Root']
+    else:
+        return []
+    # fixme
+    k, v = sol_wolf.split('=')
+    return dict(k=float(v))
 
 def solve_eq_string(math_eq_format: List[str], integer_flag=False):
     """
@@ -38,14 +63,18 @@ def solve_eq_string(math_eq_format: List[str], integer_flag=False):
 
     eq_list = []
     parse_eq_list = []
+    kw_parser = dict(evaluate=True,transformations=TRANSFORMATION)
     for eq in math_eq_format[1:]:
 
         # remove whitespaces and move to onesided equation
         rhs,lhs = eq.split('equ: ')[-1].replace(' ','').split('=')
-        parse_eq_list += [parse_expr(lhs, evaluate=True) * -1 + parse_expr(rhs, evaluate=True)]
+        parse_eq_list += [parse_expr(lhs, **kw_parser) * -1 + parse_expr(rhs, **kw_parser)]
 
-    from sympy import nsolve
     sol = solve(parse_eq_list, sym_var)
+    if sol == []:
+        eq_wolf_format = ';'.join(math_eq_format[1:]).replace('equ: ','').strip() if len(math_eq_format[1:]) > 1 else math_eq_format[1:].replace('equ: ','').strip()
+        sol = solve_with_wolfram(eq_wolf_format)
+
     if isinstance(sol,dict):
         eval_sol = [parse_expr(v).evalf(subs=dict(sol)) for v in var_str.split(',')]
         if sol == []:
