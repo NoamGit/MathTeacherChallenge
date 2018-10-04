@@ -83,7 +83,7 @@ class SIM(NearestNeighbors):
 
         # transform to equations
         predicted_equations = []
-        for _, problem in corpus_df.iterrows():
+        for k, problem in corpus_df.iterrows():
             equations = self.train_df['equations_symbol'].iloc[problem['final_neighbor_prediction']]
             var_list = self.train_df['var_list'].iloc[problem['final_neighbor_prediction']]
             if len(var_list) != len(problem['numbers']):
