@@ -1,6 +1,7 @@
 import re
 import pandas as pd
 
+PRECEDING_DICT = ['number','numbers','digit','digits','integer','integers','consecutive']
 
 def number_mapper(str, eq_num_list):
     new_str = text2int(str.lower())
@@ -57,7 +58,8 @@ def text2int(textnum, numwords={}):
     current = result = 0
     curstring = ""
     onnumber = False
-    for word in textnum.split():
+    tokenized_text = textnum.split()
+    for word,word_next in zip(tokenized_text,tokenized_text[1:]+[';']):
         if word in ordinal_words:
             scale, increment = (1, ordinal_words[word])
             current = current * scale + increment
@@ -71,6 +73,12 @@ def text2int(textnum, numwords={}):
                     word = "%s%s" % (word[:-len(ending)], replacement)
 
             if word not in numwords:
+                if onnumber:
+                    curstring += repr(result + current) + " "
+                curstring += word + " "
+                result = current = 0
+                onnumber = False
+            elif word_next in PRECEDING_DICT:
                 if onnumber:
                     curstring += repr(result + current) + " "
                 curstring += word + " "
@@ -131,7 +139,7 @@ def number_parsing(equation_list, text):
 
 
 def test_number_parsing(text):
-    text = re.sub('[.,]', '', text)
+    text = re.sub('[.,]', '', text).replace("-", " ")
     new_text_list, numbers_list = list_number_mapper([text])
     return new_text_list[0], numbers_list
 
@@ -154,7 +162,7 @@ if __name__ == '__main__':
     data = pd.read_json(r'..\Data\dolphin-number_word_std\number_word_std.dev.json')
     # data = pd.read_json(r'C:\Users\Five\Documents\DataHack\Data\dolphin-number_word_std\number_word_std.test.json')
 
-    ii = 66
+    ii = 271
     equation_list = data.iloc[ii].equations
     text = data.iloc[ii].text
     equation_list_template, eq_num_list, text_template, var_list, text_num_list = number_parsing(equation_list, text)
