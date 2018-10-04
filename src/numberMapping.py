@@ -3,7 +3,6 @@ import pandas as pd
 
 
 def number_mapper(str, eq_num_list):
-
     new_str = text2int(str.lower())
     num_list = re.findall(r'\d+', new_str)
     new_str = re.sub(r'\d+', '$N', new_str)
@@ -17,9 +16,9 @@ def number_mapper(str, eq_num_list):
         else:
             new_str = re.sub(r'\$N', f'$M', new_str, count=1)
 
-
     new_str = fix_string(new_str, str)
     return new_str, list(map(int, num_list))
+
 
 def fix_string(new_str, str):
     new_str_list = new_str.split(' ')
@@ -110,7 +109,6 @@ def list_number_mapper(eq_list):
     return new_text_list, numbers_list
 
 
-
 def index_number(equation_list, text, i):
     for j, equation in enumerate(equation_list):
         equation_list[j], is_changed = re.subn(r'\$N', f'$n{i}', equation, count=1)
@@ -120,20 +118,41 @@ def index_number(equation_list, text, i):
 
 
 def number_parsing(equation_list, text):
+    '''
+    :param equation_list: list of the equations
+    :param text: the word math question
+    :return: equation list: a new list where numbers apear as $n0, $n1,...
+            eq_num_list: values of the $n0, $n1,...
+            text: the word math question with numbers as $n0, $n1,...
+    '''
     equation_list, eq_num_list = list_number_mapper(equation_list)
     tmp_eq_num_list = eq_num_list.copy()
     text, _ = number_mapper(text, tmp_eq_num_list)
     return equation_list, eq_num_list, text
 
-train_data = pd.read_json(r'C:\Users\Five\Documents\DataHack\Data\dolphin-number_word_std\number_word_std.dev.json')
-text_list = train_data['text']
 
-for i in range(5):
-    equation_list = train_data.iloc[i].equations
-    text = train_data.iloc[i].text
+def test_number_parsing(text):
+    return list_number_mapper([text])
 
-    print(text)
-    print(equation_list)
 
-    equation_list, eq_num_list, text = number_parsing(equation_list, text)
-    print(text, '\n', equation_list, '\n', eq_num_list, '\n')
+if __name__ == '__main__':
+    train_data = pd.read_json(r'C:\Users\Five\Documents\DataHack\Data\dolphin-number_word_std\number_word_std.dev.json')
+
+    for i in range(1):
+        equation_list = train_data.iloc[i].equations
+        text = train_data.iloc[i].text
+
+        print(text)
+        print(equation_list)
+
+        equation_list, eq_num_list, text = number_parsing(equation_list, text)
+        print(text, '\n', equation_list, '\n', eq_num_list, '\n')
+
+    # test the test set
+    test_data = pd.read_json(
+        r'C:\Users\Five\Documents\DataHack\Data\dolphin-number_word_std\number_word_std.test.json')
+
+    for i in range(1):
+        test_text = test_data.iloc[i].text
+        new_text, numbers_list = test_number_parsing(test_text)
+        print(new_text, numbers_list)
