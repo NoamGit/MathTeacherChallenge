@@ -139,10 +139,11 @@ class SIM(NearestNeighbors):
             for real, pred in zip(row['equations'], row['predicted_equations']):
                 if pred.replace(' ', '') != real.replace(' ', ''):
                     if output_errors:
-                        error_list += [(k, ';'.join(row['equations']).replace('equ: ', ''), ';'.join(row['predicted_equations']).replace('equ: ', ''), row['correct'],row['text'])]
+                        error_list += [(k, ';'.join(row['equations']).replace('equ: ', ''), ';'.join(row['predicted_equations']).replace('equ: ', ''),
+                                        row['correct'],row['text'],row['text_symbol'], row['var_list'])]
                     not_correct += 1
                     break
         if output_errors:
-            return (total - not_correct) / total, pd.DataFrame(error_list, columns=['ind', 'real', 'parsed','right_neighb','text'])
+            return (total - not_correct) / total, pd.DataFrame(error_list, columns=['ind', 'real', 'parsed','right_neighb','text','text_symbol','var_list'])
         else:
             return (total - not_correct) / total
