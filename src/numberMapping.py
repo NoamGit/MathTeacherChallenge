@@ -131,7 +131,7 @@ def number_parsing(equation_list, text):
 
 
 def test_number_parsing(text):
-    text = re.sub('[.,]', '', text)
+    text = re.sub('[.,]', '', text).replace("-", " ")
     new_text_list, numbers_list = list_number_mapper([text])
     return new_text_list[0], numbers_list
 
