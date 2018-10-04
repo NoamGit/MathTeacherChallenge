@@ -6,6 +6,7 @@ from numberMapping import number_parsing, test_number_parsing
 
 import utils
 
+
 class SIM(NearestNeighbors):
     def __init__(self, **kwargs):
         super(SIM, self).__init__(**kwargs)
@@ -124,15 +125,20 @@ class SIM(NearestNeighbors):
 
         return correct/total
 
-    def equation_score(self, corpus_df):
+    def equation_score(self, corpus_df, output_errors=False):
         corpus_df = self.predict(corpus_df)
 
         not_correct, total = 0, 0
-        for _, row in corpus_df.iterrows():
+        error_list = []
+        for k, row in corpus_df.iterrows():
             total += 1
             for pred, real in zip(row['equations'], row['predicted_equations']):
                 if pred.replace(' ','') != real.replace(' ',''):
+                    if output_errors:
+                        error_list += [(k, real.replace('equ: ',''), pred.replace('equ: ',''))]
                     not_correct += 1
                     break
-
-        return (total-not_correct)/total
+        if output_errors:
+            return (total - not_correct) / total, pd.DataFrame(error_list, columns=['ind', 'real', 'parsed'])
+        else:
+            return (total-not_correct)/total
