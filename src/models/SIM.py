@@ -21,7 +21,7 @@ class SIM(NearestNeighbors):
             model after training
         '''
         # extract numbers
-        corpus_df[['equations_symbol', 'numbers', 'text_symbol', 'var_list']] = corpus_df.apply(
+        corpus_df[['equations_symbol', 'numbers', 'text_symbol', 'var_list','text_num_list']] = corpus_df.apply(
             lambda problem: pd.Series(number_parsing(problem['equations'], problem['text'])), axis=1)
 
         # save parameters

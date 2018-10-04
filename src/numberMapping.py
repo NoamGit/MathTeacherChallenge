@@ -125,8 +125,8 @@ def number_parsing(equation_list, text):
     text = re.sub('[.,]', '', text)
     equation_list, eq_num_list = list_number_mapper(equation_list)
     tmp_eq_num_list = eq_num_list.copy()
-    text, _, var_list = number_mapper(text.replace("-", " "), tmp_eq_num_list)
-    return equation_list, eq_num_list, text, var_list
+    text, text_num_list, var_list = number_mapper(text.replace("-", " "), tmp_eq_num_list)
+    return equation_list, eq_num_list, text, var_list, text_num_list
 
 
 def test_number_parsing(text):
@@ -135,26 +135,18 @@ def test_number_parsing(text):
 
 
 if __name__ == '__main__':
-    train_data = pd.read_json(r'C:\Users\Five\Documents\DataHack\Data\dolphin-number_word_std\number_word_std.dev.json')
+    data = pd.read_json(r'..\Data\dolphin-number_word_std\number_word_std.dev.json')
+    # data = pd.read_json(r'C:\Users\Five\Documents\DataHack\Data\dolphin-number_word_std\number_word_std.test.json')
 
-    for i in range(1):
-        i += 25
-        equation_list = train_data.iloc[i].equations
-        text = train_data.iloc[i].text
-
-        print(text)
-        print(equation_list)
-
-        #new_number_parsing(equation_list, text)
-
-        equation_list, eq_num_list, text, var_list = number_parsing(equation_list, text)
-        print(text, '\n', var_list, '\n', equation_list, '\n', eq_num_list, '\n')
-
+    ii = 0
+    equation_list = data.iloc[ii].equations
+    text = data.iloc[ii].text
+    equation_list_template, eq_num_list, text_template, var_list, text_num_list = number_parsing(equation_list, text)
+    print(f"\noriginal text:\t\t{text}\ntemplate text:\t\t{text_template}\ntext num list:\t\t{text_num_list}\nequation list:\t\t{equation_list}")
+    print(f"eq list template:\t{equation_list_template}\nnumlist from eq:\t\t{eq_num_list}\nfinal numlist from text:\t{var_list}")
     # test the test set
-    test_data = pd.read_json(
-        r'C:\Users\Five\Documents\DataHack\Data\dolphin-number_word_std\number_word_std.test.json')
 
-    for i in range(1):
-        test_text = test_data.iloc[i].text
-        new_text, numbers_list = test_number_parsing(test_text)
-        print(new_text, numbers_list)
+    # for i in range(1):
+    #     test_text = test_data.iloc[i].text
+    #     new_text, numbers_list = test_number_parsing(test_text)
+    #     print(new_text, numbers_list)
