@@ -52,7 +52,7 @@ def text2int(textnum, numwords={}):
     ordinal_words = {'twice': 2}
     ordinal_endings = [('ieth', 'y'), ('th', '')]
 
-    textnum = textnum.replace('-', ' ')
+    textnum = textnum.replace('-', '-')
 
     current = result = 0
     curstring = ""
@@ -135,13 +135,13 @@ def number_parsing(equation_list, text):
 
 
 def test_number_parsing(text):
-    return list_number_mapper([text])
+    return list_number_mapper([text])[0]
 
 
 if __name__ == '__main__':
     train_data = pd.read_json(r'C:\Users\Five\Documents\DataHack\Data\dolphin-number_word_std\number_word_std.dev.json')
 
-    for i in range(1):
+    for i in range(5):
         equation_list = train_data.iloc[i].equations
         text = train_data.iloc[i].text
 
