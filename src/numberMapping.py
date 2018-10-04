@@ -153,7 +153,7 @@ if __name__ == '__main__':
     data = pd.read_json(r'..\Data\dolphin-number_word_std\number_word_std.dev.json')
     # data = pd.read_json(r'C:\Users\Five\Documents\DataHack\Data\dolphin-number_word_std\number_word_std.test.json')
 
-    ii = 271
+    ii = 9
     equation_list = data.iloc[ii].equations
     text = data.iloc[ii].text
     equation_list_template, eq_num_list, text_template, var_list, text_num_list = number_parsing(equation_list, text)

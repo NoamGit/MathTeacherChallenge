@@ -72,7 +72,7 @@ class SIM(NearestNeighbors):
             relevant_neighbors = problem['neighbors_prediction'][
                 self.num_variables[problem['neighbors_prediction']] == len(problem['numbers'])]
             if i != relevant_neighbors[0]:
-                print(f"self-rank in neighbors: {np.argwhere(relevant_neighbors==i)[0][0]}")
+                print(f"self-rank in neighbors: {np.argwhere(relevant_neighbors==i)}")
                 correct.append(False)
             else:
                 correct.append(True)
