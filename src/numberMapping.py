@@ -138,11 +138,6 @@ def test_number_parsing(text):
 def generate_new_equation(equation_list_template, eq_num_list, var_list, text_num_list):
     new_equations = [equation_list_template[0]]
     for equation in equation_list_template[1:]:
-        # put back not significant numbers back from the text_num_list
-        for i, var in enumerate(var_list):
-            if var[1] != 'v':
-                continue
-            equation = equation.replace(var, str(text_num_list[i]))
         # put back the old numbers from the equation
         for i in range(len(eq_num_list)):
             if f'$n{i}' not in var_list:
@@ -158,15 +153,24 @@ if __name__ == '__main__':
     data = pd.read_json(r'..\Data\dolphin-number_word_std\number_word_std.dev.json')
     # data = pd.read_json(r'C:\Users\Five\Documents\DataHack\Data\dolphin-number_word_std\number_word_std.test.json')
 
-    ii = 122
+    ii = 271
     equation_list = data.iloc[ii].equations
     text = data.iloc[ii].text
     equation_list_template, eq_num_list, text_template, var_list, text_num_list = number_parsing(equation_list, text)
+
+    new_equations = [equation_list[0]]
+    for equation in equation_list[1:]:
+        for i, var in enumerate(var_list):
+            if var[1] == 'v':
+                continue
+            equation = equation.replace(var, str(text_num_list[i]))
+        new_equations.append(equation)
 
     print(
         f"\noriginal text:\t\t{text}\ntemplate text:\t\t{text_template}\ntext num list:\t\t{text_num_list}\nequation list:\t\t{equation_list}")
     print(
         f"eq list template:\t{equation_list_template}\nnumlist from eq:\t\t{eq_num_list}\nfinal numlist from text:\t{var_list}")
+    print(f"new equations: \t {new_equations}")
     # test the test set
 
     # for i in range(1):
