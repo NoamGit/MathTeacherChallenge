@@ -79,12 +79,11 @@ def solve_eq_string(math_eq_format: List[str], integer_flag=False):
             rhs,lhs = eq.split('equ:')[-1].replace(' ','').split('=')
             parse_eq_list += [parse_expr(lhs, **kw_parser) * -1 + parse_expr(rhs, **kw_parser)]
 
-        try:
-            # with timeout(10):
+        if len(sym_var)<=3 and '^' not in ';'.join(math_eq_format[1:]).replace('equ:','').replace(' ',''):
             sol = solve(parse_eq_list)
             if sol == []:
                 do_wolfram = True
-        except:
+        else:
             do_wolfram = True
     if do_wolfram:
         eq_wolf_format = ';'.join(math_eq_format[1:]).replace('equ:','').replace(' ','')
