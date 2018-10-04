@@ -138,14 +138,15 @@ def test_number_parsing(text):
 def generate_new_equation(equation_list_template, eq_num_list, var_list, text_num_list):
     new_equations = [equation_list_template[0]]
     for equation in equation_list_template[1:]:
-        # replace the new variables
+        # put back not significant numbers back from the text_num_list
         for i, var in enumerate(var_list):
-            if var[1] == 'v':
+            if var[1] != 'v':
                 continue
             equation = equation.replace(var, str(text_num_list[i]))
         # put back the old numbers from the equation
         for i in range(len(eq_num_list)):
-            equation = re.sub(f'\$n{i}', eq_num_list[i], equation)
+            if f'$n{i}' not in var_list:
+                equation = re.sub(f'\$n{i}', eq_num_list[i], equation)
 
         # finish
         new_equations.append(equation)
@@ -157,7 +158,7 @@ if __name__ == '__main__':
     data = pd.read_json(r'..\Data\dolphin-number_word_std\number_word_std.dev.json')
     # data = pd.read_json(r'C:\Users\Five\Documents\DataHack\Data\dolphin-number_word_std\number_word_std.test.json')
 
-    ii = 129
+    ii = 122
     equation_list = data.iloc[ii].equations
     text = data.iloc[ii].text
     equation_list_template, eq_num_list, text_template, var_list, text_num_list = number_parsing(equation_list, text)
