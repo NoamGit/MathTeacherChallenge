@@ -6,9 +6,8 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
 
 from gensim.models import Word2Vec
-
-from keras.models import Model
-from keras.layers import Input, LSTM, Dense, RepeatVector
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input, LSTM, Dense, RepeatVector
 
 class seq2seq(NearestNeighbors):
     def __init__(self, latent_dim=128, **kwargs):
