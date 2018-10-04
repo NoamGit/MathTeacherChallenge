@@ -22,7 +22,7 @@ class SIM(NearestNeighbors):
             model after training
         '''
         # extract numbers
-        corpus_df[['equations_symbol', 'numbers', 'text_symbol', 'var_list','text_num_list']] = corpus_df.apply(
+        corpus_df[['equations_symbol', 'numbers', 'text_symbol', 'var_list', 'text_num_list']] = corpus_df.apply(
             lambda problem: pd.Series(number_parsing(problem['equations'], problem['text'])), axis=1)
 
         # save parameters
@@ -55,7 +55,7 @@ class SIM(NearestNeighbors):
         '''
         # extract numbers
         corpus_df[['text_symbol', 'numbers']] = corpus_df.apply(lambda row: pd.Series(test_number_parsing(row['text'])),
-                                                         axis=1)
+                                                                axis=1)
 
         # tfidf
         X = self.tfidf_model.transform(corpus_df['text_symbol'].values)
@@ -66,24 +66,28 @@ class SIM(NearestNeighbors):
 
         # only neighbors with the same numbers
         final_neighbor_pred = []
-        # correct = []
-        for i,(_, problem) in enumerate(corpus_df.iterrows()):
+        correct = []
+        for i, (k, problem) in enumerate(corpus_df.iterrows()):
+            # TODO: add filter: same number of unknown variables
             relevant_neighbors = problem['neighbors_prediction'][
                 self.num_variables[problem['neighbors_prediction']] == len(problem['numbers'])]
-            # if i != relevant_neighbors[0]:
-            #     correct.append(False)
-            # else:
-            #     correct.append(True)
+            if i != relevant_neighbors[0]:
+                print(f"self-rank in neighbors: {np.argwhere(relevant_neighbors==i)[0][0]}")
+                correct.append(False)
+            else:
+                correct.append(True)
+
             if len(relevant_neighbors) > 0:
+                # if False:
                 final_neighbor_pred.append(relevant_neighbors[0])
             else:
                 final_neighbor_pred.append(problem['neighbors_prediction'][0])
         corpus_df['final_neighbor_prediction'] = final_neighbor_pred
-        # corpus_df['correct'] = correct
+        corpus_df['correct'] = correct
 
         # transform to equations
         predicted_equations = []
-        for _, problem in corpus_df.iterrows():
+        for k, problem in corpus_df.iterrows():
             equations = self.train_df['equations_symbol'].iloc[problem['final_neighbor_prediction']]
             var_list = self.train_df['var_list'].iloc[problem['final_neighbor_prediction']]
             if len(var_list) != len(problem['numbers']):
@@ -110,20 +114,20 @@ class SIM(NearestNeighbors):
                 a = utils.solve_eq_string(problem["predicted_equations"], integer_flag=utils.is_number(problem["text"]))
                 return a
             except Exception as e:
-                #print(e)
+                # print(e)
                 return []
 
         corpus_df = self.predict(corpus_df)
         reals_ans = corpus_df['ans_simple']
-        preds_ans = corpus_df.apply(solve,axis=1)
+        preds_ans = corpus_df.apply(solve, axis=1)
 
         correct, total = 0, 0
-        for real_ans,pred_ans in zip(reals_ans,preds_ans):
-            if utils.is_same_result(real_ans,pred_ans):
+        for real_ans, pred_ans in zip(reals_ans, preds_ans):
+            if utils.is_same_result(real_ans, pred_ans):
                 correct += 1
             total += 1
 
-        return correct/total
+        return correct / total
 
     def equation_score(self, corpus_df, output_errors=False):
         corpus_df = self.predict(corpus_df)
@@ -132,13 +136,13 @@ class SIM(NearestNeighbors):
         error_list = []
         for k, row in corpus_df.iterrows():
             total += 1
-            for pred, real in zip(row['equations'], row['predicted_equations']):
-                if pred.replace(' ','') != real.replace(' ',''):
+            for real, pred in zip(row['equations'], row['predicted_equations']):
+                if pred.replace(' ', '') != real.replace(' ', ''):
                     if output_errors:
-                        error_list += [(k, real.replace('equ: ',''), pred.replace('equ: ',''))]
+                        error_list += [(k, ';'.join(row['equations']).replace('equ: ', ''), ';'.join(row['predicted_equations']).replace('equ: ', ''), row['correct'],row['text'])]
                     not_correct += 1
                     break
         if output_errors:
-            return (total - not_correct) / total, pd.DataFrame(error_list, columns=['ind', 'real', 'parsed'])
+            return (total - not_correct) / total, pd.DataFrame(error_list, columns=['ind', 'real', 'parsed','right_neighb','text'])
         else:
-            return (total-not_correct)/total
+            return (total - not_correct) / total
