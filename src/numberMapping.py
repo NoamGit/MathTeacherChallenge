@@ -5,19 +5,22 @@ import pandas as pd
 def number_mapper(str, eq_num_list):
     new_str = text2int(str.lower())
     num_list = re.findall(r'\d+', new_str)
+    var_list = []
     new_str = re.sub(r'\d+', '$N', new_str)
     i = 0
     for possible_num in num_list:
         # real number
         if int(possible_num) in eq_num_list:
             new_str = re.sub(r'\$N', f'$n{i}', new_str, count=1)
+            var_list.append(f'$n{i}')
             i += 1
             eq_num_list.remove(int(possible_num))
         else:
             new_str = re.sub(r'\$N', f'$M', new_str, count=1)
+            var_list.append(f'$v')
 
     new_str = fix_string(new_str, str)
-    return new_str, list(map(int, num_list))
+    return new_str, list(map(int, num_list)), var_list
 
 
 def fix_string(new_str, str):
@@ -127,8 +130,8 @@ def number_parsing(equation_list, text):
     '''
     equation_list, eq_num_list = list_number_mapper(equation_list)
     tmp_eq_num_list = eq_num_list.copy()
-    text, _ = number_mapper(text, tmp_eq_num_list)
-    return equation_list, eq_num_list, text
+    text, _, var_list = number_mapper(text, tmp_eq_num_list)
+    return equation_list, eq_num_list, text, var_list
 
 
 def test_number_parsing(text):
@@ -145,8 +148,8 @@ if __name__ == '__main__':
         print(text)
         print(equation_list)
 
-        equation_list, eq_num_list, text = number_parsing(equation_list, text)
-        print(text, '\n', equation_list, '\n', eq_num_list, '\n')
+        equation_list, eq_num_list, text, var_list = number_parsing(equation_list, text)
+        print(text, '\n', equation_list, '\n', eq_num_list, '\n', var_list,'\n')
 
     # test the test set
     test_data = pd.read_json(
