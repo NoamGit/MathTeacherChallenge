@@ -11,6 +11,7 @@ from sympy.solvers import solve
 from numpy import *
 import numpy as np
 from pprint import pprint
+from Timeout import Timeout, timeout
 
 IS_NUM_DICT = ['integer','consecutive']
 TRANSFORMATION = standard_transformations + (implicit_multiplication,convert_xor,)
@@ -63,7 +64,7 @@ def solve_eq_string(math_eq_format: List[str], integer_flag=False):
     :return:
     """
     kw_parser = dict(evaluate=True, transformations=TRANSFORMATION)
-    do_wolfram = True#use_wolfram(math_eq_format[1:])
+    do_wolfram = use_wolfram(math_eq_format[1:])
     var_str = math_eq_format[0].replace(' ','').split('unkn:')[-1]
     sym_var = tuple()
     # TODO: fix hack of constraining integer solution
@@ -78,8 +79,12 @@ def solve_eq_string(math_eq_format: List[str], integer_flag=False):
             rhs,lhs = eq.split('equ:')[-1].replace(' ','').split('=')
             parse_eq_list += [parse_expr(lhs, **kw_parser) * -1 + parse_expr(rhs, **kw_parser)]
 
-        sol = solve(parse_eq_list)
-        if sol == []:
+        try:
+            # with timeout(10):
+            sol = solve(parse_eq_list)
+            if sol == []:
+                do_wolfram = True
+        except:
             do_wolfram = True
     if do_wolfram:
         eq_wolf_format = ';'.join(math_eq_format[1:]).replace('equ:','').replace(' ','')
@@ -109,7 +114,6 @@ def solve_eq_string(math_eq_format: List[str], integer_flag=False):
     # print(solve(parse_eq_list, (x,y)))
     # print(solve([-x + y - 4, 2*x - 5*y + 11], sym_var))
     # print(solve([-x + y - 4, 2*x - 5*y + 11], (x,y)))
-
 
 def is_number(query_text:str):
     query_text = query_text.lower()

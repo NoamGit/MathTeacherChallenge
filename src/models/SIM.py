@@ -102,7 +102,7 @@ class SIM(NearestNeighbors):
 
         return corpus_df
 
-    def result_score(self, corpus_df):
+    def result_score(self, corpus_df, frac=1, verbose=False):
 
         def solve(problem):
             try:
@@ -113,14 +113,22 @@ class SIM(NearestNeighbors):
                 return []
 
         corpus_df = self.predict(corpus_df)
-        reals_ans = corpus_df['ans_simple']
-        preds_ans = corpus_df.apply(solve,axis=1)
 
         correct, total = 0, 0
-        for real_ans,pred_ans in zip(reals_ans,preds_ans):
-            if utils.is_same_result(real_ans,pred_ans):
+        for _,problem in corpus_df.sample(frac=frac).iterrows():
+            pred_ans = solve(problem)
+            real_ans = problem['ans_simple']
+            if utils.is_same_result(real_ans, pred_ans):
                 correct += 1
             total += 1
+            if verbose: print(correct,total,correct/total)
+
+        # reals_ans = corpus_df['ans_simple']
+        # preds_ans = corpus_df.apply(solve, axis=1)
+        # for real_ans,pred_ans in zip(reals_ans,preds_ans):
+        #     if utils.is_same_result(real_ans,pred_ans):
+        #         correct += 1
+        #     total += 1
 
         return correct/total
 
