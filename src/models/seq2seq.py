@@ -102,7 +102,8 @@ class seq2seq(NearestNeighbors):
         labeled_equations = [label_encoder.transform(equation) for equation in new_equations]
         onehot_equations = [onehot_encoded.transform(labeled_equation.reshape(len(labeled_equation), 1)) for labeled_equation in labeled_equations]
 
-        Y = np.array([np.concatenate([np.zeros((max_length - len(onehot_equation), self.latent_dim)),onehot_equations]) for onehot_equation in onehot_equations])
+        Y = np.array([np.concatenate([onehot_equations, np.zeros((max_length - len(onehot_equation), self.latent_dim))])
+                      for onehot_equation in onehot_equations])
 
         return Y, max_length
 
@@ -131,19 +132,19 @@ class seq2seq(NearestNeighbors):
 
         # only neighbors with the same numbers
         final_neighbor_pred = []
-        for _,row in corpus_df.iterrows():
-            relevant_neighbors = row['neighbors_prediction'][self.num_numbers[row['neighbors_prediction']] == len(row['numbers'])]
+        for _,problem in corpus_df.iterrows():
+            relevant_neighbors = problem['neighbors_prediction'][self.num_numbers[problem['neighbors_prediction']] == len(problem['numbers'])]
             final_neighbor_pred.append(relevant_neighbors[0])
         corpus_df['final_neighbor_prediction'] = final_neighbor_pred
 
         # transform to equations
         predicted_equations = []
-        for _, row in corpus_df.iterrows():
-            equations = self.train_df['equations'].iloc[row['final_neighbor_prediction']]
+        for _, problem in corpus_df.iterrows():
+            equations = self.train_df['equations'].iloc[problem['final_neighbor_prediction']]
 
             new_equations = [equations[0]]
             for equation in equations[1:]:
-                for i,number in enumerate(row['numbers']):
+                for i,number in enumerate(problem['numbers']):
                     equation.replace(f'$n{i}',number)
                 new_equations.append(equation)
             predicted_equations.append(new_equations)

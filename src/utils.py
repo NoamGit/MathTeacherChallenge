@@ -26,9 +26,6 @@ def switch_sign(txt:str):
         txt_list[plus_pos] = '-'
     return ''.join(txt_list)
 
-def are_close(l1,l2):
-    return np.allclose(np.sort(l1).astype(float), np.sort(l2))
-
 def solve_with_wolfram(input_str:str):
     sol_wolfram = WOLF_CLIENT.query(input_str.split('equ: ')[-1].replace(' ', ''))
     # TODO: parse wolfram solution
@@ -54,7 +51,7 @@ def solve_eq_string(math_eq_format: List[str], integer_flag=False):
     :param math_eq_format:
     :return:
     """
-    var_str = math_eq_format[0].split('unkn: ')[-1]
+    var_str = math_eq_format[0].replace(' ','').split('unkn:')[-1]
     sym_var = tuple()
     # TODO: fix hack of constraining integer solution
     for v in var_str.split(','):
@@ -70,6 +67,7 @@ def solve_eq_string(math_eq_format: List[str], integer_flag=False):
         rhs,lhs = eq.split('equ: ')[-1].replace(' ','').split('=')
         parse_eq_list += [parse_expr(lhs, **kw_parser) * -1 + parse_expr(rhs, **kw_parser)]
 
+    from sympy import nsolve
     sol = solve(parse_eq_list, sym_var)
     if sol == []:
         eq_wolf_format = ';'.join(math_eq_format[1:]).replace('equ: ','').strip() if len(math_eq_format[1:]) > 1 else math_eq_format[1:].replace('equ: ','').strip()
@@ -116,5 +114,20 @@ def parse_ans_col(ans: str):
         ans.replace
         if '|' not in ans:
             pass
-
 # endregion
+
+def is_same_result(real_ans,pred_ans):
+    if len(pred_ans)>0 and isinstance(pred_ans,list) and isinstance(pred_ans[0],list):
+        for cur_pred_ans in pred_ans:
+            if are_close(cur_pred_ans,real_ans):
+                return True
+    elif are_close(pred_ans,real_ans):
+        return True
+    return False
+
+def are_close(l1,l2):
+    try:
+        res = len(l1) == len(l2) and np.allclose(np.sort(l1).astype(float), np.sort(l2).astype(float),rtol=0.001)
+        return res
+    except:
+        return False
