@@ -4,23 +4,23 @@ import pandas as pd
 
 def number_mapper(str, eq_num_list):
     new_str = text2int(str.lower())
-    num_list = re.findall(r'\d+', new_str)
+    num_list = re.findall(r'[0-9/]+', new_str)
     var_list = []
-    new_str = re.sub(r'\d+', '$N', new_str)
-    i = 0
+    new_str = re.sub(r'[0-9/]+', '$N', new_str)
+    original_eq_num_list = eq_num_list.copy()
     for possible_num in num_list:
         # real number
-        if int(possible_num) in eq_num_list:
+        if possible_num in eq_num_list:
+            i = original_eq_num_list.index(possible_num)
             new_str = re.sub(r'\$N', f'$n{i}', new_str, count=1)
             var_list.append(f'$n{i}')
-            i += 1
-            eq_num_list.remove(int(possible_num))
+            eq_num_list.remove(possible_num)
         else:
             new_str = re.sub(r'\$N', f'$M', new_str, count=1)
             var_list.append(f'$v')
 
-    new_str = fix_string(new_str, str)
-    return new_str, list(map(int, num_list)), var_list
+    #new_str = fix_string(new_str, str)
+    return new_str, num_list, var_list
 
 
 def fix_string(new_str, str):
@@ -95,10 +95,12 @@ def list_number_mapper(eq_list):
     new_text_list = []
     numbers_list = []
     for str in eq_list:
+        if str[:4] == 'unkn':
+            new_text_list.append(str)
+            continue
         new_str = text2int(str.lower())
-        num_list = re.findall(r'\d+', new_str)
-        new_str = re.sub(r'\d+', '$N', new_str)
-        num_list = list(map(int, num_list))
+        num_list = re.findall(r'[0-9/]+', new_str)
+        new_str = re.sub(r'[0-9/]+', '$N', new_str)
 
         new_text_list.append(new_str)
         numbers_list += num_list
@@ -112,14 +114,6 @@ def list_number_mapper(eq_list):
     return new_text_list, numbers_list
 
 
-def index_number(equation_list, text, i):
-    for j, equation in enumerate(equation_list):
-        equation_list[j], is_changed = re.subn(r'\$N', f'$n{i}', equation, count=1)
-        if is_changed:
-            break
-    return equation_list, text
-
-
 def number_parsing(equation_list, text):
     '''
     :param equation_list: list of the equations
@@ -128,28 +122,33 @@ def number_parsing(equation_list, text):
             eq_num_list: values of the $n0, $n1,...
             text: the word math question with numbers as $n0, $n1,...
     '''
+    text = re.sub('[.,]', '', text)
     equation_list, eq_num_list = list_number_mapper(equation_list)
     tmp_eq_num_list = eq_num_list.copy()
-    text, _, var_list = number_mapper(text, tmp_eq_num_list)
+    text, _, var_list = number_mapper(text.replace("-", " "), tmp_eq_num_list)
     return equation_list, eq_num_list, text, var_list
 
 
 def test_number_parsing(text):
-    return list_number_mapper([text])[0]
+    new_text_list, numbers_list = list_number_mapper([text])
+    return new_text_list[0], numbers_list
 
 
 if __name__ == '__main__':
     train_data = pd.read_json(r'C:\Users\Five\Documents\DataHack\Data\dolphin-number_word_std\number_word_std.dev.json')
 
-    for i in range(5):
+    for i in range(1):
+        i += 25
         equation_list = train_data.iloc[i].equations
         text = train_data.iloc[i].text
 
         print(text)
         print(equation_list)
 
+        #new_number_parsing(equation_list, text)
+
         equation_list, eq_num_list, text, var_list = number_parsing(equation_list, text)
-        print(text, '\n', equation_list, '\n', eq_num_list, '\n', var_list,'\n')
+        print(text, '\n', var_list, '\n', equation_list, '\n', eq_num_list, '\n')
 
     # test the test set
     test_data = pd.read_json(
