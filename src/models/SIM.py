@@ -30,7 +30,7 @@ class SIM(NearestNeighbors):
         self.num_variables = self.train_df['var_list'].map(len).values
 
         # tfidf
-        self.tfidf_model = TfidfVectorizer()
+        self.tfidf_model = TfidfVectorizer() # binary=True
         corpus = self.train_df['text_symbol'].values
         self.tfidf_model.fit(corpus)
         X = self.tfidf_model.transform(corpus)
