@@ -102,7 +102,7 @@ class SIM(NearestNeighbors):
 
         return corpus_df
 
-    def result_score(self, corpus_df, frac=1, verbose=False, output_errors=False):
+    def result_score(self, corpus_df, frac=1, verbose=False, use_ans=True, output_errors=False):
 
         def solve(problem):
             try:
@@ -118,12 +118,18 @@ class SIM(NearestNeighbors):
         correct, total = 0, 0
         for k,problem in corpus_df.sample(frac=frac).iterrows():
             pred_ans = solve(problem)
-            real_ans = problem['ans_simple']
-            if utils.is_same_result(real_ans, pred_ans):
+
+            if utils.is_same_result([problem['ans_simple']], pred_ans):
                 correct += 1
+                error_list += [(k, ';'.join(problem['equations']).replace('equ:', ''),
+                                ';'.join(problem['predicted_equations']).replace('equ:', ''), problem['text'],'1')]
+            elif use_ans and utils.is_same_result(utils.get_real_answer(problem), pred_ans):
+                correct += 1
+                error_list += [(k, ';'.join(problem['equations']).replace('equ:', ''),
+                                ';'.join(problem['predicted_equations']).replace('equ:', ''), problem['text'],'1')]
             else:
                 error_list += [(k, ';'.join(problem['equations']).replace('equ:', ''),
-                                ';'.join(problem['predicted_equations']).replace('equ:', ''), problem['text'])]
+                                ';'.join(problem['predicted_equations']).replace('equ:', ''), problem['text'],'0')]
 
             total += 1
             if verbose: print(correct,total,correct/total)
@@ -136,7 +142,7 @@ class SIM(NearestNeighbors):
         #     total += 1
 
         if output_errors:
-            return correct / total, pd.DataFrame(error_list, columns=['ind', 'equations', 'predicted_equations','text'])
+            return correct / total, pd.DataFrame(error_list, columns=['ind', 'equations', 'predicted_equations','text','correct'])
         else:
             return correct / total
 
