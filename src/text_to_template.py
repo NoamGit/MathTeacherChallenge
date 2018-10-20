@@ -156,27 +156,3 @@ def generate_new_equation(equation_list_template, eq_num_list, var_list):
         new_equations.append(equation)
 
     return new_equations
-
-
-if __name__ == '__main__':
-    data = pd.read_json(r'..\Data\dolphin-number_word_std\number_word_std.dev.json')
-    # data = pd.read_json(r'C:\Users\Five\Documents\DataHack\data\dolphin-number_word_std\test_data.json')
-
-    ii = 271
-    equation_list = data.iloc[ii].equations
-    text = data.iloc[ii].text
-    equation_list_template, eq_num_list, text_template, var_list, text_num_list = number_parsing(equation_list, text)
-
-    print(
-        f"\noriginal text:\t\t{text}\ntemplate text:\t\t{text_template}\ntext num list:\t\t{text_num_list}\nequation list:\t\t{equation_list}")
-    print(
-        f"eq list template:\t{equation_list_template}\nnumlist from eq:\t\t{eq_num_list}\nfinal numlist from text:\t{var_list}")
-
-    # test the test set
-    test_template, text_num_list = test_number_parsing(text)
-    print(f'test_template: \t {test_template}')
-    print(f'num list: \t {text_num_list}')
-    # for i in range(1):
-    #     test_text = test_data.iloc[i].text
-    #     new_text, numbers_list = test_number_parsing(test_text)
-    #     print(new_text, numbers_list)
