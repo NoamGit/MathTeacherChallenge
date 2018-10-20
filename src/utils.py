@@ -3,44 +3,19 @@ from typing import List
 import wolframalpha
 from sympy.parsing.sympy_parser import parse_expr
 from sympy.parsing.sympy_parser import standard_transformations, convert_xor,implicit_multiplication
-from sympy import symbols,var,Symbol
-from sympy import solveset, S
-from sympy.sets.sets import EmptySet
-from sympy.solvers.solveset import linsolve
+from sympy import Symbol
 from sympy.solvers import solve
 from numpy import *
 import numpy as np
-from pprint import pprint
-from Timeout import Timeout, timeout
 
 IS_NUM_DICT = ['integer','consecutive']
 TRANSFORMATION = standard_transformations + (implicit_multiplication,convert_xor,)
 WOLF_CLIENT = wolframalpha.Client(app_id="23XUAT-H2875HHEEX")
+
 # region Utilities
-
-def switch_sign(txt:str):
-    minus_pos = txt.find('-')
-    plus_pos = txt.find('+')
-    txt_list = list(txt)
-    if minus_pos != -1:
-        txt_list[minus_pos] = '+'
-    if plus_pos != -1:
-        txt_list[plus_pos] = '-'
-    return ''.join(txt_list)
-
-# def solve_with_wolfram(input_str:str):
-#     sol_wolfram = WOLF_CLIENT.query(input_str.split('equ: ')[-1].replace(' ', ''))
-#     # TODO: parse wolfram solution
-#     sol_wolf = [cur_result['subpod'] for cur_result in list(sol_wolfram.results) if
-#                 cur_result['@id'] in ['IntegerSolution', 'IntegerSolutions', 'Solutions', 'Solution', 'Results', 'Result']][0]
-#     sol_wolf = [cur_sol_wolf['plaintext'].replace(' ', '') for cur_sol_wolf in sol_wolf]
-#
-#     final_results = [result.split('=') for result in sol_wolf]
-#     return [{k: float(v)} for k,v in final_results]
 
 def solve_with_wolfram(input_str:str):
     sol_wolfram = WOLF_CLIENT.query(input_str.split('equ: ')[-1].replace(' ', ''))
-    # TODO: parse wolfram solution
     if 'Solutions' in sol_wolfram.details:
         sol_wolf = sol_wolfram.details['Solutions']
     elif 'Solution' in sol_wolfram.details:
@@ -108,11 +83,6 @@ def solve_eq_string(math_eq_format: List[str], integer_flag=False):
             else:
                 eval_sol += [eval_itr]
         return eval_sol
-
-    # print(solve(parse_eq_list, sym_var))
-    # print(solve(parse_eq_list, (x,y)))
-    # print(solve([-x + y - 4, 2*x - 5*y + 11], sym_var))
-    # print(solve([-x + y - 4, 2*x - 5*y + 11], (x,y)))
 
 def sparse_binary_jaccard(v1, v2):
     v1_nz = set(v1.nonzero()[1])

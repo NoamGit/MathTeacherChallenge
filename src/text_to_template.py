@@ -3,8 +3,8 @@ import pandas as pd
 
 PRECEDING_DICT = ['number','numbers','digit','digits','integer','integers','consecutive']
 
-def number_mapper(str, eq_num_list):
-    new_str = text2int(str.lower())
+def number_mapper(txt, eq_num_list):
+    new_str = text2int(txt.lower())
     num_list = re.findall(r'[0-9/]+', new_str)
     var_list = []
     new_str = re.sub(r'[0-9/]+', '$N', new_str)
@@ -134,7 +134,7 @@ def number_parsing(equation_list, text):
     equation_list_template, eq_num_list = list_number_mapper(equation_list)
     tmp_eq_num_list = eq_num_list.copy()
     text, text_num_list, var_list = number_mapper(text.replace("-", " "), tmp_eq_num_list)
-    new_equation_list = generate_new_equation(equation_list_template, eq_num_list, var_list, text_num_list)
+    new_equation_list = generate_new_equation(equation_list_template, eq_num_list, var_list)
     return new_equation_list, eq_num_list, text, var_list, text_num_list
 
 
@@ -144,7 +144,7 @@ def test_number_parsing(text):
     return new_text_list[0], numbers_list
 
 
-def generate_new_equation(equation_list_template, eq_num_list, var_list, text_num_list):
+def generate_new_equation(equation_list_template, eq_num_list, var_list):
     new_equations = [equation_list_template[0]]
     for equation in equation_list_template[1:]:
         # put back the old numbers from the equation
@@ -160,7 +160,7 @@ def generate_new_equation(equation_list_template, eq_num_list, var_list, text_nu
 
 if __name__ == '__main__':
     data = pd.read_json(r'..\Data\dolphin-number_word_std\number_word_std.dev.json')
-    # data = pd.read_json(r'C:\Users\Five\Documents\DataHack\Data\dolphin-number_word_std\number_word_std.test.json')
+    # data = pd.read_json(r'C:\Users\Five\Documents\DataHack\data\dolphin-number_word_std\test_data.json')
 
     ii = 271
     equation_list = data.iloc[ii].equations
